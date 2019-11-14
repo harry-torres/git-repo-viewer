@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import { Link } from 'react-router-dom';
 import PropTypes from 'prop-types';
+import { FaSpinner } from 'react-icons/fa';
 import api from '../../services/api';
 import { Loading, Owner, IssueList } from './styles';
 import Container from '../../components/Container';
@@ -52,7 +53,11 @@ export default class Repository extends Component {
     const { repository, issues, loading } = this.state;
 
     if (loading) {
-      return <Loading>Carregando</Loading>;
+      return (
+        <Loading>
+          <FaSpinner size={40} />
+        </Loading>
+      );
     }
     return (
       <Container>
@@ -69,7 +74,7 @@ export default class Repository extends Component {
               <div>
                 <strong>
                   <a href={issue.html_url}>{issue.title}</a>
-                  {issue.labels.map(label=>(
+                  {issue.labels.map(label => (
                     <span key={String(label.id)}>{label.name}</span>
                   ))}
                 </strong>
