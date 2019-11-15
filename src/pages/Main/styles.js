@@ -80,3 +80,15 @@ export const List = styled.ul`
     }
   }
 `;
+
+export const Exception = styled.div`
+  margin-top: 20px;
+  background: #faa;
+  border: 1px solid #f55;
+  border-radius: 4px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 50px;
+  font-size: 18px;
+`;

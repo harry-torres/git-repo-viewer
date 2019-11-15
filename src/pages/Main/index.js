@@ -4,14 +4,14 @@ import { Link } from 'react-router-dom';
 
 import api from '../../services/api';
 import Container from '../../components/Container';
-import { Form, SubmitButton, List } from './styles';
+import { Form, SubmitButton, List, Exception } from './styles';
 
 export default class Main extends Component {
   state = {
     newRepo: '',
     repositories: [],
     loading: false,
-    error: false
+    error: null
   };
 
   // load localstorage data
@@ -32,19 +32,31 @@ export default class Main extends Component {
   }
 
   handleInputChange = e => {
-    this.setState({ newRepo: e.target.value });
+    this.setState({ newRepo: e.target.value, error: null });
   };
 
   handleSubmit = async e => {
     e.preventDefault();
 
     this.setState({
-      error: false,
+      error: null,
       loading: true
     });
     try {
       const { newRepo, repositories } = this.state;
-      const response = await api.get(`/repos/${newRepo}`);
+
+      if (newRepo === '') throw new Error('Repository name required!');
+
+      const repoExists = repositories.find(
+        repo => repo.name.toLowerCase() === newRepo.toLowerCase()
+      );
+
+      if (repoExists) throw new Error('Repository already exists!');
+
+      const response = await api.get(`/repos/${newRepo}`).catch(() => {
+        throw new Error('Repository not found!');
+      });
+
       const data = {
         name: response.data.full_name
       };
@@ -55,7 +67,7 @@ export default class Main extends Component {
       });
     } catch (err) {
       this.setState({
-        error: true
+        error: err
       });
     } finally {
       this.setState({ loading: false });
@@ -70,6 +82,7 @@ export default class Main extends Component {
           <FaGithubAlt />
           Repositories
         </h1>
+        {error && <Exception>{error.message}</Exception>}
         <Form onSubmit={this.handleSubmit} error={error}>
           <input
             type="text"
