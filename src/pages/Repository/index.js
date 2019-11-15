@@ -27,7 +27,6 @@ export default class Repository extends Component {
     const { match } = this.props;
 
     const repoName = decodeURIComponent(match.params.repository);
-    console.log(repoName);
     // github.api.com/repos/rocketseat/unform
     // const response = await api.get(`/repos/${repoName}`);
     // github.api.com/repos/rocketseat/unform/issues
@@ -59,6 +58,7 @@ export default class Repository extends Component {
         </Loading>
       );
     }
+
     return (
       <Container>
         <Owner>
