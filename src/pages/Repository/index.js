@@ -3,10 +3,8 @@ import { Link } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import { FaSpinner } from 'react-icons/fa';
 import api from '../../services/api';
-import { Loading, Owner, IssueList } from './styles';
+import { Loading, Owner, IssueList, PageButtons } from './styles';
 import Container from '../../components/Container';
-
-// import { Container } from './styles';
 
 export default class Repository extends Component {
   static propTypes = {
@@ -20,36 +18,69 @@ export default class Repository extends Component {
   state = {
     repository: {},
     issues: [],
-    loading: true
+    loading: true,
+    filter: { option: 'all', page: 1, per_page: 5 }
   };
 
   async componentDidMount() {
     const { match } = this.props;
 
     const repoName = decodeURIComponent(match.params.repository);
-    // github.api.com/repos/rocketseat/unform
-    // const response = await api.get(`/repos/${repoName}`);
-    // github.api.com/repos/rocketseat/unform/issues
-    // const issues = await api.get(`/repos/${repoName}/issues`);
-    const [repository, issues] = await Promise.all([
-      api.get(`/repos/${repoName}`),
-      api.get(`/repos/${repoName}/issues`, {
-        params: {
-          state: 'open',
-          per_page: 5
-        }
-      })
-    ]);
+
+    const repository = await api.get(`/repos/${repoName}`);
+
+    this.loadIssues();
 
     this.setState({
       repository: repository.data,
-      issues: issues.data,
       loading: false
     });
   }
 
+  loadIssues = async () => {
+    const { match } = this.props;
+    const { filter } = this.state;
+    const { page, per_page } = filter;
+
+    const repoName = decodeURIComponent(match.params.repository);
+
+    const response = await api.get(`/repos/${repoName}/issues`, {
+      params: {
+        state: filter.option,
+        page,
+        per_page
+      }
+    });
+
+    this.setState({
+      issues: response.data
+    });
+    // to find out the last page:
+    // console.log(response.headers.link);
+  };
+
+  handleFilterChange = async e => {
+    const { filter } = { ...this.state };
+
+    filter.option = e.target.value;
+
+    await this.setState({ filter });
+    this.loadIssues();
+  };
+
+  handleClick = async e => {
+    const { filter } = { ...this.state };
+    if (e.target.id === 'next') {
+      filter.page += 1;
+    } else if (e.target.id === 'prev') {
+      filter.page -= 1;
+    }
+    await this.setState({ filter });
+    this.loadIssues();
+  };
+
   render() {
-    const { repository, issues, loading } = this.state;
+    const { repository, issues, loading, filter } = this.state;
 
     if (loading) {
       return (
@@ -67,6 +98,11 @@ export default class Repository extends Component {
           <h1>{repository.name}</h1>
           <p>{repository.description}</p>
         </Owner>
+        <select value={filter.option} onChange={this.handleFilterChange}>
+          <option value="all">All</option>
+          <option value="open">Open</option>
+          <option value="closed">Closed</option>
+        </select>
         <IssueList>
           {issues.map(issue => (
             <li key={String(issue.id)}>
@@ -83,6 +119,24 @@ export default class Repository extends Component {
             </li>
           ))}
         </IssueList>
+        <PageButtons>
+          <button
+            id="prev"
+            type="button"
+            disabled={filter.page === 1}
+            onClick={this.handleClick}
+          >
+            Prev
+          </button>
+          <button
+            id="next"
+            type="button"
+            // disabled={}
+            onClick={this.handleClick}
+          >
+            Next
+          </button>
+        </PageButtons>
       </Container>
     );
   }

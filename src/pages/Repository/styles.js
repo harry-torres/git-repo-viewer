@@ -15,6 +15,7 @@ export const Loading = styled.div`
   justify-content: center;
   align-items: center;
   height: 100vh;
+  z-index: 1;
 
   svg {
     color: #eee;
@@ -115,6 +116,26 @@ export const IssueList = styled.ul`
       margin-top: 5px;
       font-size: 12px;
       color: #999;
+    }
+  }
+`;
+export const PageButtons = styled.div`
+  display: flex;
+  flex: 1;
+  justify-content: flex-end;
+  button {
+    border: none;
+    font-size: 14px;
+    color: #eee;
+    background: #7159c1;
+    border-radius: 4px;
+    padding: 10px 10px;
+    &[disabled] {
+      cursor: not-allowed;
+      opacity: 0.6;
+    }
+    & + button {
+      margin-left: 20px;
     }
   }
 `;
